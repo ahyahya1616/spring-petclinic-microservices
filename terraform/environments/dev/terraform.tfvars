@@ -4,7 +4,7 @@ project_name = "petclinic"
 
 # EKS Configuration
 cluster_name        = "petclinic-eks"
-cluster_version     = "1.30"
+cluster_version     = "1.35"
 node_capacity_type  = "SPOT" # Maximize cost-savings for free-tier / credits
 node_instance_types = ["t3.large"]
 node_min_size       = 2
