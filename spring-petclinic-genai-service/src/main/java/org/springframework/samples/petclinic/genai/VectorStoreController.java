@@ -40,10 +40,19 @@ public class VectorStoreController {
 
 	private final VectorStore vectorStore;
     private final WebClient webClient;
+    private final String vetsHostname;
 
     public VectorStoreController(VectorStore vectorStore, WebClient.Builder webClientBuilder) {
+        this(vectorStore, webClientBuilder, "http://vets-service:8080/");
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public VectorStoreController(VectorStore vectorStore,
+                                 WebClient.Builder webClientBuilder,
+                                 @org.springframework.beans.factory.annotation.Value("${VETS_SERVICE_URL:http://vets-service:8080}") String vetsHostname) {
 		this.webClient = webClientBuilder.build();
 		this.vectorStore = vectorStore;
+        this.vetsHostname = (vetsHostname != null && vetsHostname.endsWith("/")) ? vetsHostname : vetsHostname + "/";
 	}
 
 	@EventListener
@@ -63,7 +72,6 @@ public class VectorStoreController {
 		// If vectorstore.json is deleted, the data will be loaded on startup every time.
 		// Warning - this can be costly in terms of credits used with the AI provider.
 		// Fetches all Vet entites and creates a document per vet
-        String vetsHostname = "http://vets-service/";
         List<Vet> vets = webClient
 	            .get()
 	            .uri(vetsHostname + "vets")

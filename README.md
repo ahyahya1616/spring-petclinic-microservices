@@ -3,9 +3,9 @@
 [![Build Status](https://github.com/spring-petclinic/spring-petclinic-microservices/actions/workflows/maven-build.yml/badge.svg)](https://github.com/spring-petclinic/spring-petclinic-microservices/actions/workflows/maven-build.yml)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-This project demonstrates how to split the classic Spring PetClinic sample application into **[microservices](http://www.martinfowler.com/articles/microservices.html)**, with a **Vue.js frontend** and a Spring AI-powered chatbot.
+This project demonstrates how to split the classic Spring PetClinic sample application into **[microservices](http://www.martinfowler.com/articles/microservices.html)**, with a **Vue.js frontend** and a Spring AI-powered chatbot, modernized for **Kubernetes (EKS), Istio, and GitOps**.
 To achieve that goal, it relies on Spring Boot, **Spring Cloud Gateway**, **Spring Cloud Circuit Breaker** with Resilience4j, **Spring Cloud Config**, Micrometer Tracing with Zipkin, Prometheus and Grafana for monitoring, 
-Spring Boot Admin, Chaos Monkey for Spring Boot,  and the Eureka Service Discovery from the [Spring Cloud Netflix](https://github.com/spring-cloud/spring-cloud-netflix) technology stack.
+Spring Boot Admin, Chaos Monkey for Spring Boot, and cloud-native Kubernetes DNS service discovery.
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/spring-petclinic/spring-petclinic-microservices)
 
@@ -14,13 +14,15 @@ Spring Boot Admin, Chaos Monkey for Spring Boot,  and the Eureka Service Discove
 ## Starting services locally without Docker
 
 Every microservice is a Spring Boot application and can be started locally using IDE or `../mvnw spring-boot:run` command.
-Please note that supporting services (Config and Discovery Server) must be started before any other application (Customers, Vets, Visits and API).
+Please note that supporting services (Config Server) must be started before any other application (Customers, Vets, Visits and API).
 Startup of Tracing server, Admin server, Grafana and Prometheus is optional.
 If everything goes well, you can access the following services at given location:
-* Discovery Server - http://localhost:8761
 * Config Server - http://localhost:8888
 * Vue.js frontend (API Gateway) - http://localhost:8080
-* Customers, Vets, Visits and GenAI Services - random port, check Eureka Dashboard 
+* Customers Service - http://localhost:8081
+* Visits Service - http://localhost:8082
+* Vets Service - http://localhost:8083
+* GenAI Service - http://localhost:8084
 * Tracing Server (Zipkin) - http://localhost:9411/zipkin/ (we use [openzipkin](https://github.com/openzipkin/zipkin/tree/main/zipkin-server))
 * Admin Server (Spring Boot Admin) - http://localhost:9090
 * Grafana Dashboards - http://localhost:3030
@@ -53,9 +55,7 @@ Once images are ready, you can start them with a single command
 
 Containers startup order is coordinated with the `service_healthy` condition of the Docker Compose [depends-on](https://github.com/compose-spec/compose-spec/blob/main/spec.md#depends_on) expression 
 and the [healthcheck](https://github.com/compose-spec/compose-spec/blob/main/spec.md#healthcheck) of the service containers. 
-After starting services, it takes a while for API Gateway to be in sync with service registry,
-so don't be scared of initial Spring Cloud Gateway timeouts. You can track services availability using Eureka dashboard
-available by default at http://localhost:8761.
+After starting services, the API Gateway immediately routes traffic to the backend microservices using DNS resolution.
 
 The `main` branch uses an Eclipse Temurin with Java 17 as Docker base image.
 
@@ -93,7 +93,6 @@ This project consists of several microservices:
 - **GenAI Service**: Provides a chatbot interface to the application.
 - **API Gateway**: Routes client requests to the appropriate services.
 - **Config Server**: Centralized configuration management for all services.
-- **Discovery Server**: Eureka-based service registry.
 
 Each service has its own specific role and communicates via REST APIs.
 
@@ -213,7 +212,7 @@ All those three REST controllers `OwnerResource`, `PetResource` and `VisitResour
 | Spring Cloud components         | Resources  |
 |---------------------------------|------------|
 | Configuration server            | [Config server properties](spring-petclinic-config-server/src/main/resources/application.yml) and [Configuration repository] |
-| Service Discovery               | [Eureka server](spring-petclinic-discovery-server) and [Service discovery client](spring-petclinic-vets-service/src/main/java/org/springframework/samples/petclinic/vets/VetsServiceApplication.java) |
+| Service Discovery               | Kubernetes CoreDNS / DNS Resolution ([docker-compose.yml](docker-compose.yml)) |
 | API Gateway                     | [Spring Cloud Gateway starter](spring-petclinic-api-gateway/pom.xml) and [Routing configuration](/spring-petclinic-api-gateway/src/main/resources/application.yml) |
 | Docker Compose                  | [Spring Boot with Docker guide](https://spring.io/guides/gs/spring-boot-docker/) and [docker-compose file](docker-compose.yml) |
 | Circuit Breaker                 | [Resilience4j fallback method](spring-petclinic-api-gateway/src/main/java/org/springframework/samples/petclinic/api/boundary/web/ApiGatewayController.java)  |

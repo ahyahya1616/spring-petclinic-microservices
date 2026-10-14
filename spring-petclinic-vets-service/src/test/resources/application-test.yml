@@ -10,10 +10,6 @@ spring:
     hibernate:
       ddl-auto: none
 
-eureka:
-  client:
-    enabled: false
-
 vets:
   cache:
     ttl: 10

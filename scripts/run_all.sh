@@ -25,7 +25,7 @@ done
 
 INFRA_SERVICES=(grafana-server prometheus-server tracing-server)
 
-APP_MODULES=(config-server discovery-server customers-service visits-service vets-service genai-service api-gateway admin-server)
+APP_MODULES=(config-server customers-service visits-service vets-service genai-service api-gateway admin-server)
 
 # Resolves the executable jar of a module (ignores sources/javadoc/original jars).
 find_jar() {
@@ -90,8 +90,6 @@ echo "Running apps"
 mkdir -p target
 start_app spring-petclinic-config-server 8888 config-server
 wait_for_service config-server 8888
-start_app spring-petclinic-discovery-server 8761 discovery-server
-wait_for_service discovery-server 8761
 start_app spring-petclinic-customers-service 8081 customers-service
 start_app spring-petclinic-visits-service 8082 visits-service
 start_app spring-petclinic-vets-service 8083 vets-service

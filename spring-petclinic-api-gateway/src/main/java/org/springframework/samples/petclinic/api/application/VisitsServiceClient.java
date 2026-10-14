@@ -22,6 +22,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import static java.util.stream.Collectors.joining;
 
 /**
@@ -31,12 +33,19 @@ import static java.util.stream.Collectors.joining;
 public class VisitsServiceClient {
 
     // Could be changed for testing purpose
-    private String hostname = "http://visits-service/";
+    private String hostname;
 
     private final WebClient.Builder webClientBuilder;
 
     public VisitsServiceClient(WebClient.Builder webClientBuilder) {
+        this(webClientBuilder, "http://visits-service:8080/");
+    }
+
+    @Autowired
+    public VisitsServiceClient(WebClient.Builder webClientBuilder,
+                               @Value("${VISITS_SERVICE_URL:http://visits-service:8080}") String hostname) {
         this.webClientBuilder = webClientBuilder;
+        setHostname(hostname);
     }
 
     public Mono<Visits> getVisitsForPets(final List<Integer> petIds) {
