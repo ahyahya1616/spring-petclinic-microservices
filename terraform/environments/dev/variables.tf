@@ -63,9 +63,9 @@ variable "cluster_version" {
 }
 
 variable "node_capacity_type" {
-  description = "Capacity type for worker nodes: SPOT (cost-optimized, free tier / credit friendly) or ON_DEMAND"
+  description = "Capacity type for worker nodes: SPOT or ON_DEMAND"
   type        = string
-  default     = "SPOT"
+  default     = "ON_DEMAND"
   validation {
     condition     = contains(["SPOT", "ON_DEMAND"], var.node_capacity_type)
     error_message = "node_capacity_type must be either 'SPOT' or 'ON_DEMAND'."
